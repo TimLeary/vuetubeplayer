@@ -1,26 +1,39 @@
 <template>
-  <div class="container">
-    <div id="youtubeplayer">
-      <youtube
-        v-if="isSelectedVideoNotEmpty"
-        :video-id="selectedVideo"
-        player-width="604"
-        player-height="1240"
-        :player-vars="youtubeVars"
-        @ready="youtubeReady"
-        @ended="youtubeEnded"
-        @playing="youtubePlaying"
-        @paused="youtubePaused"
-        @buffering="youtubeBuffering"
-        @qued="youtubeQued"
-        ></youtube>
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+        <div id="youtubeplayer">
+          <youtube
+            v-if="isSelectedVideoNotEmpty"
+            :video-id="selectedVideo"
+            player-width="1240"
+            player-height="604"
+            :player-vars="youtubeVars"
+            @ready="youtubeReady"
+            @ended="youtubeEnded"
+            @playing="youtubePlaying"
+            @paused="youtubePaused"
+            @buffering="youtubeBuffering"
+            @qued="youtubeQued"
+            @click.native="clickOnPlayer($event)"
+            ></youtube>
+        </div>
+      </div>
     </div>
     <div id="youtube_control">
-      <div class="form-group">
-        <input type="text" id="youtube_search_input" class="form-control" v-model="searchText" @focus="searchInputFocus" :placeholder="$t('vuetube.enterSearchTermHere')" />
+      <div class="row justify-content-center">
+        <div class="col-12 align-self-center">
+          <div class="form-group">
+            <input type="text" id="youtube_search_input" class="form-control" v-model="searchText" @focus="searchInputFocus" :placeholder="$t('vuetube.enterSearchTermHere')" />
+          </div>
+        </div>
       </div>
-      <div class="form-group">
-        <button class="form-control btn btn-sm" @click="searchYoutube()">{{ $t('vuetube.search') }}</button>
+      <div class="row justify-content-center">
+        <div class="col-12 align-self-center">
+          <div class="form-group">
+            <button class="form-control btn btn-sm btn-default" @click="searchYoutube()">{{ $t('vuetube.search') }}</button>
+          </div>
+        </div>
       </div>
     </div>
     <div v-if="isResultEmpty" id="resultList">
@@ -38,6 +51,9 @@
   ul {
     list-style-type: none;
   }
+  iframe[id^="youtube-player"] {
+    pointer-events: none;
+  }
 </style>
 
 <script>
@@ -47,6 +63,8 @@ export default {
   name: 'VueTube',
   data: function () {
     return {
+      player: null,
+      playerStatus: null,
       searchText: '',
       results: {},
       selectedVideo: '',
@@ -55,10 +73,13 @@ export default {
         'start': 0,
         'autoplay': 1,
         'modestbranding': 1,
-        'controls': 1,
+        'controls': 0,
         'showinfo': 0,
         'fs': 1,
-        'rel': 0
+        'rel': 0,
+        'widget_referrer': 1,
+        'enablejsapi': 1,
+        'autohide': 2
       }
     }
   },
@@ -74,8 +95,29 @@ export default {
     log (message) {
       console.log(`${new Date().toLocaleTimeString()} -- ${message}`)
     },
+    controllPause: function () {
+      if (this.player) {
+        this.player.pauseVideo()
+      }
+    },
+    controllPlay: function () {
+      if (this.player) {
+        this.player.playVideo()
+      }
+    },
+    controllSetVolume: function (volume = 100) {
+      if (this.player) {
+        this.player.playVideo(volume)
+      }
+    },
+    clickOnPlayer: function (event) {
+      if (this.playerStatus === 'playing') {
+        this.controllPause()
+      } else {
+        this.controllPlay()
+      }
+    },
     searchYoutube: function () {
-      console.log(this.searchText)
       getSearchVideosPromise(this.searchText)
         .then((response) => {
           this.results = response.data
@@ -91,12 +133,32 @@ export default {
     searchInputFocus: function () {
 
     },
-    youtubeReady: function () { this.log('ready') },
-    youtubePlaying: function () { this.log('playing') },
-    youtubeEnded: function () { this.log('ended') },
-    youtubePaused: function () { this.log('paused') },
-    youtubeBuffering: function () { this.log('buffering') },
-    youtubeQued: function () { this.log('qued') }
+    youtubeReady: function (event) {
+      this.playerStatus = 'ready'
+      this.player = event.target
+      this.controllSetVolume(100)
+      this.log('ready')
+    },
+    youtubePlaying: function () {
+      this.playerStatus = 'playing'
+      this.log('playing')
+    },
+    youtubeEnded: function () {
+      this.playerStatus = 'ended'
+      this.log('ended')
+    },
+    youtubePaused: function () {
+      this.playerStatus = 'paused'
+      this.log('paused')
+    },
+    youtubeBuffering: function () {
+      this.playerStatus = 'paused'
+      this.log('buffering')
+    },
+    youtubeQued: function () {
+      this.playerStatus = 'qued'
+      this.log('qued')
+    }
   }
 }
 </script>
