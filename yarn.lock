@@ -6905,6 +6905,10 @@ vue-loader@^13.3.0:
     vue-style-loader "^3.0.0"
     vue-template-es2015-compiler "^1.6.0"
 
+vue-rx@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/vue-rx/-/vue-rx-6.0.1.tgz#4e4e9234339cbfa4e1968d67595cfe00293c6edc"
+
 vue-scrollto@^2.11.0:
   version "2.11.0"
   resolved "https://registry.yarnpkg.com/vue-scrollto/-/vue-scrollto-2.11.0.tgz#0657f127faded60a71fbcc841f393279a49aed55"

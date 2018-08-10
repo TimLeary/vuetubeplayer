@@ -16,9 +16,18 @@
             @buffering="youtubeBuffering"
             @qued="youtubeQued"
             @click.native="clickOnPlayer($event)"
+            :mute="mute"
             ></youtube>
         </div>
       </div>
+    </div>
+    <div class="row justify-content-center" v-if="isSelectedVideoNotEmpty">
+      <div class="col btn-group btn-group-sm">
+          <button type="button" class="btn btn-primary btn-sm" @click="playOrPause">{{ mainControllButtonText }}</button>
+          <button type="button" class="btn btn-primary btn-sm" @click="muteOrUnmute">{{ muteControllButtonText }}</button>
+      </div>
+      <div class="col">Player current time: {{ playerCurrentTime }}</div>
+      <div class="col">Player total time: {{ playerTotalTime }}</div>
     </div>
     <div id="youtube_control">
       <div class="row justify-content-center">
@@ -63,6 +72,8 @@ export default {
   name: 'VueTube',
   data: function () {
     return {
+      playerTime: 0,
+      mute: false,
       player: null,
       playerStatus: null,
       searchText: '',
@@ -83,12 +94,43 @@ export default {
       }
     }
   },
+  watch: {
+    playerCurrentTime: function () {
+      console.log('Time changed')
+    },
+    deep: true
+  },
   computed: {
+    playerCurrentTime: function () {
+      if (this.playerStatus === 'playing') {
+        return this.player.getCurrentTime()
+      }
+      return 0
+    },
+    playerTotalTime: function () {
+      if (this.playerStatus === 'playing') {
+        return this.player.getDuration()
+      }
+    },
     isResultEmpty: function () {
       return this.results.hasOwnProperty('items') && this.results.items.length > 0
     },
     isSelectedVideoNotEmpty: function () {
       return this.selectedVideo !== ''
+    },
+    mainControllButtonText: function () {
+      if (this.playerStatus === 'playing') {
+        return this.$t('vuetube.pause')
+      } else {
+        return this.$t('vuetube.play')
+      }
+    },
+    muteControllButtonText: function () {
+      if (this.mute === false) {
+        return this.$t('vuetube.mute')
+      }
+
+      return this.$t('vuetube.unmute')
     }
   },
   methods: {
@@ -110,12 +152,18 @@ export default {
         this.player.playVideo(volume)
       }
     },
-    clickOnPlayer: function (event) {
+    playOrPause: function () {
       if (this.playerStatus === 'playing') {
         this.controllPause()
       } else {
         this.controllPlay()
       }
+    },
+    muteOrUnmute: function () {
+      this.mute = !this.mute
+    },
+    clickOnPlayer: function (event) {
+      this.playOrPause()
     },
     searchYoutube: function () {
       getSearchVideosPromise(this.searchText)
