@@ -1,0 +1,2 @@
+iframe[id^="youtube-player"] {
+  pointer-events: none; }
