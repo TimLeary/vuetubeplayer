@@ -26,7 +26,7 @@
           <button type="button" class="btn btn-primary btn-sm" @click="playOrPause">{{ mainControllButtonText }}</button>
           <button type="button" class="btn btn-primary btn-sm" @click="muteOrUnmute">{{ muteControllButtonText }}</button>
       </div>
-      <div class="col">Player current time: {{ playerCurrentTime }}</div>
+      <div class="col">Player current time: {{ timer$ }}</div>
       <div class="col">Player total time: {{ playerTotalTime }}</div>
     </div>
     <div id="youtube_control">
@@ -56,20 +56,22 @@
   </div>
 </template>
 
-<style>
-  ul {
-    list-style-type: none;
-  }
-  iframe[id^="youtube-player"] {
-    pointer-events: none;
-  }
-</style>
-
 <script>
 import { getSearchVideosPromise } from '@/services/YoutubeApi'
+import { Observable } from 'rxjs'
 
 export default {
   name: 'VueTube',
+  created: function () {
+    this.foreverAsk()
+  },
+  subscriptions: function () {
+    return {
+      timer$: Observable.defer(
+        () => Observable.of(this.playerCurrentTime)
+      )
+    }
+  },
   data: function () {
     return {
       playerTime: 0,
@@ -94,19 +96,7 @@ export default {
       }
     }
   },
-  watch: {
-    playerCurrentTime: function () {
-      console.log('Time changed')
-    },
-    deep: true
-  },
   computed: {
-    playerCurrentTime: function () {
-      if (this.playerStatus === 'playing') {
-        return this.player.getCurrentTime()
-      }
-      return 0
-    },
     playerTotalTime: function () {
       if (this.playerStatus === 'playing') {
         return this.player.getDuration()
@@ -134,6 +124,18 @@ export default {
     }
   },
   methods: {
+    foreverAsk: function () {
+      setTimeout(this.playerCurrentTime, 1000)
+    },
+    playerCurrentTime: function () {
+      let currentTime = 0
+      if (this.playerStatus === 'playing') {
+        currentTime = this.player.getCurrentTime()
+        console.log(currentTime)
+      }
+      console.log(currentTime)
+      return currentTime
+    },
     log (message) {
       console.log(`${new Date().toLocaleTimeString()} -- ${message}`)
     },
