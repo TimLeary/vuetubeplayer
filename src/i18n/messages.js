@@ -7,7 +7,8 @@ export default {
       play: 'Abspielen',
       pause: 'Pause',
       mute: 'Stumm',
-      unmute: 'Stumme mich'
+      unmute: 'Stumme mich',
+      fullscreen: 'Vollbild'
     }
   },
   en: {
@@ -18,7 +19,8 @@ export default {
       play: 'Play',
       pause: 'Pause',
       mute: 'Mute',
-      unmute: 'Unmute'
+      unmute: 'Unmute',
+      fullscreen: 'Fullscreen'
     }
   }
 }
