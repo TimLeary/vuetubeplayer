@@ -134,10 +134,16 @@ export default {
     playFullscreen: function () {
       let elem = document.getElementById('playerscreen')
       if (this.playerFullscreen === false) {
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen()
+        }
         if (elem.webkitRequestFullscreen) {
           elem.webkitRequestFullscreen()
         }
       } else {
+        if (elem.exitFullscreen) {
+          document.exitFullscreen()
+        }
         if (elem.webkitRequestFullscreen) {
           document.webkitExitFullscreen()
         }
