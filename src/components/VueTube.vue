@@ -1,7 +1,8 @@
 <template>
   <div class="container-fluid">
-    <div class="row justify-content-center">
-      <div class="col-12" id="youtubeplayer">
+    <div id="playerscreen">
+      <div class="row justify-content-center">
+        <div class="col-12" id="youtubeplayer">
           <youtube
             v-if="isSelectedVideoNotEmpty"
             :video-id="selectedVideo"
@@ -17,16 +18,18 @@
             @click.native="clickOnPlayer($event)"
             :mute="mute"
             ></youtube>
-      </div>
-    </div>
-    <div class="row justify-content-center no-gutters" v-if="isSelectedVideoNotEmpty">
-      <div class="col btn-group btn-group-sm">
+          </div>
+        </div>
+      <div class="row justify-content-center no-gutters" v-if="isSelectedVideoNotEmpty">
+        <div class="col btn-group btn-group-sm">
           <button type="button" class="btn btn-primary btn-sm" @click="playOrPause">{{ mainControllButtonText }}</button>
           <button type="button" class="btn btn-primary btn-sm" @click="muteOrUnmute">{{ muteControllButtonText }}</button>
-      </div>
-      <div class="col">{{ playerTimeFormated }} / {{ playerTotalTimeFormated }}</div>
-      <div class="col-8 btn-primary" id="player-process-slider" @click="playerSliderClicked($event)">
-        <div id="player-process" v-bind:style="{ width: processWidth +'%' }"></div>
+          <button type="button" class="btn btn-primary btn-sm" @click="playFullscreen">{{ $t('vuetube.fullscreen') }}</button>
+        </div>
+        <div class="col">{{ playerTimeFormated }} / {{ playerTotalTimeFormated }}</div>
+        <div class="col-8 btn-primary" id="player-process-slider" @click="playerSliderClicked($event)">
+          <div id="player-process" v-bind:style="{ width: processWidth +'%' }"></div>
+        </div>
       </div>
     </div>
     <div id="youtube_control">
@@ -65,6 +68,7 @@ export default {
   name: 'VueTube',
   data: function () {
     return {
+      playerFullscreen: false,
       playerTime: 0,
       playerTotalTime: 0,
       playerWidth: 0,
@@ -127,6 +131,19 @@ export default {
     }
   },
   methods: {
+    playFullscreen: function () {
+      let elem = document.getElementById('playerscreen')
+      if (this.playerFullscreen === false) {
+        if (elem.webkitRequestFullscreen) {
+          elem.webkitRequestFullscreen()
+        }
+      } else {
+        if (elem.webkitRequestFullscreen) {
+          document.webkitExitFullscreen()
+        }
+      }
+      this.playerFullscreen = !this.playerFullscreen
+    },
     getPlayerDimension: function () {
       let ytWidth = document.getElementById('youtubeplayer').clientWidth
       return {
@@ -172,7 +189,7 @@ export default {
     },
     controllSetVolume: function (volume = 100) {
       if (this.player) {
-        this.player.playVideo(volume)
+        this.player.setVolume(volume)
       }
     },
     playOrPause: function () {
