@@ -1,13 +1,12 @@
 <template>
   <div class="container-fluid">
     <div class="row justify-content-center">
-      <div class="col-12">
-        <div id="youtubeplayer">
+      <div class="col-12" id="youtubeplayer">
           <youtube
             v-if="isSelectedVideoNotEmpty"
             :video-id="selectedVideo"
-            player-width="1240"
-            player-height="604"
+            :player-width="playerWidth"
+            :player-height="playerHeight"
             :player-vars="youtubeVars"
             @ready="youtubeReady"
             @ended="youtubeEnded"
@@ -18,16 +17,17 @@
             @click.native="clickOnPlayer($event)"
             :mute="mute"
             ></youtube>
-        </div>
       </div>
     </div>
-    <div class="row justify-content-center" v-if="isSelectedVideoNotEmpty">
+    <div class="row justify-content-center no-gutters" v-if="isSelectedVideoNotEmpty">
       <div class="col btn-group btn-group-sm">
           <button type="button" class="btn btn-primary btn-sm" @click="playOrPause">{{ mainControllButtonText }}</button>
           <button type="button" class="btn btn-primary btn-sm" @click="muteOrUnmute">{{ muteControllButtonText }}</button>
       </div>
-      <div class="col">Player current time: {{ playerTime }}</div>
-      <div class="col">Player total time: {{ playerTotalTime }}</div>
+      <div class="col">{{ playerTimeFormated }} / {{ playerTotalTimeFormated }}</div>
+      <div class="col-8 btn-primary" id="player-process-slider" @click="playerSliderClicked($event)">
+        <div id="player-process" v-bind:style="{ width: processWidth +'%' }"></div>
+      </div>
     </div>
     <div id="youtube_control">
       <div class="row justify-content-center">
@@ -67,6 +67,8 @@ export default {
     return {
       playerTime: 0,
       playerTotalTime: 0,
+      playerWidth: 0,
+      playerHeight: 0,
       mute: false,
       player: null,
       playerStatus: null,
@@ -88,6 +90,11 @@ export default {
       }
     }
   },
+  mounted () {
+    let playerDimension = this.getPlayerDimension()
+    this.playerWidth = playerDimension.width
+    this.playerHeight = playerDimension.height
+  },
   computed: {
     isResultEmpty: function () {
       return this.results.hasOwnProperty('items') && this.results.items.length > 0
@@ -108,9 +115,42 @@ export default {
       }
 
       return this.$t('vuetube.unmute')
+    },
+    playerTimeFormated: function () {
+      return this.formatTime(this.playerTime)
+    },
+    playerTotalTimeFormated: function () {
+      return this.formatTime(this.playerTotalTime)
+    },
+    processWidth: function () {
+      return (this.playerTime / this.playerTotalTime) * 100
     }
   },
   methods: {
+    getPlayerDimension: function () {
+      let ytWidth = document.getElementById('youtubeplayer').clientWidth
+      return {
+        width: ytWidth,
+        height: Math.ceil(ytWidth / 2)
+      }
+    },
+    playerSliderClicked: function (event) {
+      let rate = (event.offsetX / event.target.offsetWidth)
+      let seekerPos = this.playerTotalTime * rate
+      this.player.seekTo(seekerPos, true)
+    },
+    formatTime: function (timeInSecond, padChar = '0', timeDelimiter = ':') {
+      let seconds = Math.floor(timeInSecond)
+      let hours = Math.floor(seconds / 3600)
+      seconds -= hours * 3600
+      let minutes = Math.floor(seconds / 60)
+      seconds -= minutes * 60
+
+      if (hours < 10) { hours = padChar + hours }
+      if (minutes < 10) { minutes = padChar + minutes }
+      if (seconds < 10) { seconds = padChar + seconds }
+      return hours + timeDelimiter + minutes + timeDelimiter + seconds
+    },
     playerCurrentTime: function () {
       this.playerTime = this.player.getCurrentTime()
     },

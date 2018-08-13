@@ -4,6 +4,14 @@ iframe[id^="youtube-player"] {
 ul.vertical-list {
   list-style-type: none; }
 
+div#player-process-slider {
+  background-color: #007bff;
+  border-color: #007bff; }
+
+div#player-process {
+  background-color: rgba(255, 255, 255, 0.5);
+  height: 100%; }
+
 *,
 *::before,
 *::after {
