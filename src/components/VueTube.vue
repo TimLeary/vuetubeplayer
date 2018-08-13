@@ -46,7 +46,7 @@
       </div>
     </div>
     <div v-if="isResultEmpty" id="resultList">
-      <ul>
+      <ul class="vertical-list">
       <li v-for="video in results.items" v-bind:key="video.id.videoId" @click="playVideo(video)">
         <img :src="video.snippet.thumbnails.medium.url"/>
         <h4>{{ video.snippet.title }}</h4>

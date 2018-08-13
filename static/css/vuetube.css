@@ -1,6 +1,9 @@
 iframe[id^="youtube-player"] {
   pointer-events: none; }
 
+ul.vertical-list {
+  list-style-type: none; }
+
 *,
 *::before,
 *::after {
