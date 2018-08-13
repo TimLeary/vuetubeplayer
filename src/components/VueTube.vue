@@ -26,7 +26,7 @@
           <button type="button" class="btn btn-primary btn-sm" @click="playOrPause">{{ mainControllButtonText }}</button>
           <button type="button" class="btn btn-primary btn-sm" @click="muteOrUnmute">{{ muteControllButtonText }}</button>
       </div>
-      <div class="col">Player current time: {{ timer$ }}</div>
+      <div class="col">Player current time: {{ playerTime }}</div>
       <div class="col">Player total time: {{ playerTotalTime }}</div>
     </div>
     <div id="youtube_control">
@@ -58,23 +58,15 @@
 
 <script>
 import { getSearchVideosPromise } from '@/services/YoutubeApi'
-import { Observable } from 'rxjs'
+
+let playerInterval = null
 
 export default {
   name: 'VueTube',
-  created: function () {
-    this.foreverAsk()
-  },
-  subscriptions: function () {
-    return {
-      timer$: Observable.defer(
-        () => Observable.of(this.playerCurrentTime)
-      )
-    }
-  },
   data: function () {
     return {
       playerTime: 0,
+      playerTotalTime: 0,
       mute: false,
       player: null,
       playerStatus: null,
@@ -97,11 +89,6 @@ export default {
     }
   },
   computed: {
-    playerTotalTime: function () {
-      if (this.playerStatus === 'playing') {
-        return this.player.getDuration()
-      }
-    },
     isResultEmpty: function () {
       return this.results.hasOwnProperty('items') && this.results.items.length > 0
     },
@@ -124,17 +111,11 @@ export default {
     }
   },
   methods: {
-    foreverAsk: function () {
-      setTimeout(this.playerCurrentTime, 1000)
-    },
     playerCurrentTime: function () {
-      let currentTime = 0
-      if (this.playerStatus === 'playing') {
-        currentTime = this.player.getCurrentTime()
-        console.log(currentTime)
-      }
-      console.log(currentTime)
-      return currentTime
+      this.playerTime = this.player.getCurrentTime()
+    },
+    getPlayerTotalTime: function () {
+      this.playerTotalTime = this.player.getDuration()
     },
     log (message) {
       console.log(`${new Date().toLocaleTimeString()} -- ${message}`)
@@ -181,13 +162,23 @@ export default {
       this.selectedVideo = video.id.videoId
     },
     searchInputFocus: function () {
-
     },
     youtubeReady: function (event) {
       this.playerStatus = 'ready'
       this.player = event.target
       this.controllSetVolume(100)
+      this.getPlayerTotalTime()
+      this.createCurrentTimeRefresher()
       this.log('ready')
+    },
+    createCurrentTimeRefresher: function () {
+      if (playerInterval) {
+        window.clearInterval(playerInterval)
+      }
+      playerInterval = this.createInterval(this.playerCurrentTime, 100)
+    },
+    createInterval: function (func, time) {
+      return window.setInterval(func, time)
     },
     youtubePlaying: function () {
       this.playerStatus = 'playing'
